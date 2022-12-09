@@ -87,6 +87,17 @@ class ChordRecognition:
         self.is_even_beat=beat[:,1]%2==1
         self.qt_beat_onset=qt_beat_onset
         self.qt_beat_offset=qt_beat_offset
+        self.__get_bar_beat()
+
+    # ThomasLee:
+    def __get_bar_beat(self):
+        num_beats_per_bar = 4
+        self._bar_beat = list()
+        for idx, downbeat in enumerate(self.is_downbeat):
+            if downbeat:
+                bar_idx = idx // num_beats_per_bar
+            beat_idx = idx % num_beats_per_bar
+            self._bar_beat.append((bar_idx, beat_idx))
 
 
     def decode(self):
@@ -143,7 +154,9 @@ class ChordRecognition:
             prev_c=prec[current_i]
             start=prev_i+1 if self.half_beat_switch or self.is_even_beat[prev_i+1]  else prev_i+2
             end=current_i if self.half_beat_switch or current_i==n_frame-1 or self.is_even_beat[current_i+1]  else current_i+1
-            result.append([self.qt_beat_onset[start],self.qt_beat_offset[end],self.chord_class.chord_list[prev_c]])
+            # result.append([self.qt_beat_onset[start],self.qt_beat_offset[end],self.chord_class.chord_list[prev_c]])
+            # ThomasLee
+            result.append((self._bar_beat[start], self._bar_beat[end], self.chord_class.chord_list[prev_c]))
             current_i=prev_i
         result=result[::-1]
         #print(dp)
